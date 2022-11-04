@@ -26,6 +26,7 @@ app.get('/', (req, res) => {
     res.render('home') 
     //render 會告訴view engine 這是獨立的一個頁面，不需要layout
 })
+//rsgf
 
 app.post("/get_actor", async (req, res) => {
     const lastName = req.body.actor;
