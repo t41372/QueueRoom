@@ -204,7 +204,6 @@ async function deleteUser(password){
 
     //get queue
     let getQueue = await queryPromiseAll(`SELECT queue FROM Room WHERE RoomNumber = ${roomNumber}`)
-    console.log(getPassword);
 
 
     if(password != getPassword){
