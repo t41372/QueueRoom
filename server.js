@@ -16,7 +16,9 @@ let db = new sqlite3.Database("./database.db", (err) => {
 
 app.use(express.static('html'))
 
-
+app.get('/', (req, res) => {
+    res.redirect('/welcome_page.html')
+})
 
 // need a query param password
 app.get('/in_room', async(req, res) => {
