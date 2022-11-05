@@ -34,14 +34,14 @@ app.post('/addRoom', (req, res) => {
     addRoom()
 })
 // :id is the room number to add people into
-app.post('/addPeople/:roomNumber', (req, res) => {
+app.get('/addPeople/:roomNumber', (req, res) => {
     // add people into the specific room
     
     // password is the return value - the password of the added people
-    let password = addPeople(request.params.roomNumber)
+    let password = addPeople(req.params.roomNumber)
     if(password) //if added successfully
     {
-        res.send(`Successfully add people into room ${request.params.roomNumber}, password is ${password}`)
+        res.send(`Successfully add people into room ${req.params.roomNumber}, password is ${password}`)
     }
     else
     {
@@ -51,7 +51,7 @@ app.post('/addPeople/:roomNumber', (req, res) => {
 
 // :password is the password of the people to be deleted
 app.delete('/deleteUser/:password', (req, res) => {
-    if(!deleteUser(request.params.password))
+    if(!deleteUser(req.params.password))
     {
         res.send("Fail")
     }
@@ -132,17 +132,24 @@ async function queryPromiseGet(query)
     })
 }
 
+
+function addRoom(roomName){
+    let insertQuery = queryPromiseRun(`INSERT INTO RoomList(RoomNumber,RoomName) values(?,?)`);
+    let value = [null,roomName];
+    queryPromiseRun
+}
+
 // Add people into the specific room and return its password (randomly generated)
 // param: roomNumber: spcify the room number
 // Return: password of the added people, False if fail (room not exists)
 async function addPeople(roomNumber){
-    // 1. check if the room exists
-    let queryResult = await queryPromiseGet(`SELECT * FROM Room WHERE roomNumber = ${roomNumber}`)
+    // 1. check if the room exists in the room list
+    let queryResult = await queryPromiseGet(`SELECT * FROM RoomList WHERE RoomNumber = ${roomNumber}`)
 
     // if query result exists, the room must exists
     if(!queryResult) // if the room not exists
     {
-        console.log(`Room ${roomNumber} not exists`)
+        console.log(`Room ${roomNumber} not exists, query result is ${queryResult}`)
         return false;
     }
     
@@ -163,8 +170,8 @@ async function addPeople(roomNumber){
     // we should have the password now...
 
     // 3. add people into the room with password and return the new password
-    
-    queryPromiseGet = await queryPromiseRun(`INSERT INTO Room (roomNumber, password) VALUES (${roomNumber}, ${password})`)
+    // select MAX(Room.queue)
+    queryPromiseGet = await queryPromiseRun(`INSERT INTO Room (roomNumber, password, queue) VALUES (${roomNumber}, ${password}, ???)`)
     console.log("Successfully add people into room " + roomNumber + ", password is " + password)
     
     return password
@@ -183,11 +190,13 @@ async function deleteUser(password){
     //get password
     let getPassword = getValue.password;
 
+    //get room nuumber by password
     let getRoomnumber = await queryPromiseGet(`SELECT RoomNumber FROM Room WHERE password = 2222`)
-    let roomNumber = getRoomnumber.queue
+    let roomNumber = getRoomnumber.RoomNumber
 
+    //get queue
     let getQueue = await queryPromiseAll(`SELECT queue FROM Room WHERE RoomNumber = ${roomNumber}`)
-    console.log(roomNumber);
+    console.log(getQueue);
 
     // if(password != getPassword){
     //     return false;
@@ -203,7 +212,7 @@ async function deleteUser(password){
 
 }
 
-deleteUser();
+// deleteUser();
 // handlebar 是一個template engine，可以讓我們在html裡面加入一些動態的內容
 // 例如：{{}}，這個就是handlebar的語法，可以在裡面放入一些變數，或是function
 // 這邊我們放入一個變數，變數的內容是從server.js傳過來的
