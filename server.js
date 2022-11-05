@@ -31,25 +31,47 @@ app.get('/', (req, res) => {
 
 // Create a new room
 app.get('/addRoom/:roomName', (req, res) => {
+    console.log("hello is " + req.query)
     console.log("room name is " + req.params.roomName)
     //addRoom(req.params.roomName)
     res.send("Successfully add room " + req.params.roomName)
 })
 
+// Create a new room
+app.get('/addRoom/', (req, res) => {
+    
+    addRoom(req.query.room_name)
+    res.send("Successfully add room " + req.query.room_name)
+})
+
 // :id is the room number to add people into
-app.get('/addPeople/:roomNumber', (req, res) => {
+app.get('/addPeople/', async (req, res) => {
     // add people into the specific room
     
     // password is the return value - the password of the added people
-    let password = addPeople(req.params.roomNumber)
+    let password = await addPeople(req.query.roomNumber)
     if(password) //if added successfully
     {
-        res.send(`Successfully add people into room ${req.params.roomNumber}, password is ${password}`)
+        let people = (await getPeople(password))[0]
+        // console.log(people)
+        res.send(`Successfully add people into room ${req.query.roomNumber}, password is ${password}<br/>` +
+        `ID: ${people.id}, password: ${people.password}, RoomNumber: ${people.RoomNumber}, queue: ${people.queue}`)
     }
     else
     {
         res.send("Fail")
     }
+})
+
+// get data about a person
+app.get('/getPeople/:password', async (req, res) => {
+    let people = (await getPeople(req.params.password))[0]
+    res.send(`ID: ${people.id}, password: ${people.password}, RoomNumber: ${people.RoomNumber}, queue: ${people.queue}`)
+})
+
+app.get('/getPeople/', async (req, res) => {
+    let people = (await getPeople(req.query.password))[0]
+    res.send(`ID: ${people.id}, password: ${people.password}, RoomNumber: ${people.RoomNumber}, queue: ${people.queue}`)
 })
 
 // :password is the password of the people to be deleted
@@ -114,6 +136,14 @@ async function queryPromiseRun(insertQuery, values){
     })
 }
 
+// get people's information
+// return type: JavaScript Object {id, password, RoomNumber, queue}
+async function getPeople(password){
+    let getRoom = await queryPromiseAll(`SELECT * FROM Room WHERE password = ${password}`)
+    return getRoom
+}
+
+
 // query the database db with input parameter "query" using ALL
 // return undefined if the query target does not exists
 async function queryPromiseAll(query)
@@ -122,6 +152,7 @@ async function queryPromiseAll(query)
         db.all(query, (err, data) => { //.all 用於獲取所有東西的特定fields
             if(err)                 //.get 可以獲取單一特定數據
             {
+                console.log("Rejected 152")
                 reject(err.message)
             }
             resolve(data)
@@ -167,9 +198,8 @@ async function addRoom(roomName){
 // Return: password of the added people, False if fail (room not exists)
 async function addPeople(roomNumber){
     // 1. check if the room exists in the room list
-    let queryResult = await queryPromiseGet(`SELECT * FROM RoomList WHERE RoomNumber = ${roomNumber}`)
-
-
+    let queryResult = await queryPromiseAll(`SELECT * FROM RoomList WHERE RoomNumber = ${roomNumber}`)
+    
     // if query result exists, the room must exists
     if(!queryResult) // if the room not exists
     {
@@ -179,18 +209,17 @@ async function addPeople(roomNumber){
     
     // 2. create a new password for the new people
 
-    let password = Math.floor(Math.random() * 100000) //generate a random 5 digit password
+    let newPassword = Math.floor(Math.random() * 100000) //generate a random 5 digit password
 
     while(true)
     {
-        let queryResult = await queryPromiseGet(`SELECT * FROM Room WHERE password = ${password}`)
-        
+        let queryResult = await queryPromiseGet(`SELECT password FROM Room WHERE password = ${newPassword}`)
         if(!queryResult) // if the password not exists
         {
             break;
         }
         // if the password does exists, generate a new one
-        password = Math.floor(Math.random() * 100000) //generate a random 5 digit password
+        newPassword = Math.floor(Math.random() * 100000) //generate a random 5 digit password
     }
     // we should have the password now...
 
@@ -207,11 +236,11 @@ async function addPeople(roomNumber){
         maxOfQueue = 0;
     }
 
-    queryPromiseGet = await queryPromiseRun(`INSERT INTO Room(id, roomNumber, password, queue) VALUES(null, ${roomNumber}, ${password}, ${nextQueueNumber})`)
-    console.log("Successfully add people into room " + roomNumber + ", password is " + password)
+    queryPromiseGet = await queryPromiseRun(`INSERT INTO Room(id, roomNumber, password, queue) VALUES(null, ${roomNumber}, ${newPassword}, ${nextQueueNumber})`)
+    console.log("Successfully add people into room " + roomNumber + ", password is " + newPassword)
 
     
-    return password
+    return newPassword
 
     // !-------INSERT INTO Room(id,password,RoomNumber,queue) values(1,2222,null,1);
 

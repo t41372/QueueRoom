@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Enter Room    </title>
+</head>
+
+<body>
+    <h1>Enter Room, plase enter the room</h1>
+
+    <!-- New User-->
+    <h1>New User</h1>
+    <form action="http://localhost:8080/addPeople/" method="get">
+        <label>Room Number:</label>
+        <input type="text" name="roomNumber" placeholder="Room name"/>
+        <input type="submit" value="Submit"/>
+    </form>
+
+    <!-- Existing User-->
+    <h1>Existing User</h1>
+    <form action="http://localhost:8080/getPeople/" method="get">
+        <label>Room Number:</label>
+        password: <input type="password" name="password">
+        <input type="submit" value="Submit"/>
+    </form>
+
+
+</body>
