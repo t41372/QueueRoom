@@ -133,10 +133,10 @@ async function queryPromiseGet(query)
 }
 
 
-function addRoom(roomName){
-    let insertQuery = queryPromiseRun(`INSERT INTO RoomList(RoomNumber,RoomName) values(?,?)`);
+async function addRoom(roomName){
+    let insertQuery = `INSERT INTO RoomList(RoomNumber,RoomName) values(?,?)`;
     let value = [null,roomName];
-    queryPromiseRun
+    await queryPromiseRun(insertQuery, value)
 }
 
 // Add people into the specific room and return its password (randomly generated)
@@ -170,8 +170,16 @@ async function addPeople(roomNumber){
     // we should have the password now...
 
     // 3. add people into the room with password and return the new password
-    // select MAX(Room.queue)
-    queryPromiseGet = await queryPromiseRun(`INSERT INTO Room (roomNumber, password, queue) VALUES (${roomNumber}, ${password}, ???)`)
+
+    let maxOfQueue = await queryPromiseGet(`SELECT MAX(queue) FROM Room WHERE RoomNumber = ${roomNumber}`)
+    let nextQueueNumber = maxOfQueue.queue
+    console.log(`next queue number is ${nextQueueNumber}`)
+    if(!maxOfQueue) //if max of queue is null, means the room is empty
+    {
+        maxOfQueue = 0;
+    }
+
+    queryPromiseGet = await queryPromiseRun(`INSERT INTO Room (roomNumber, password, queue) VALUES (${roomNumber}, ${password}, ${nextQueueNumber})`)
     console.log("Successfully add people into room " + roomNumber + ", password is " + password)
     
     return password
@@ -196,17 +204,33 @@ async function deleteUser(password){
 
     //get queue
     let getQueue = await queryPromiseAll(`SELECT queue FROM Room WHERE RoomNumber = ${roomNumber}`)
-    console.log(getQueue);
+    console.log(getPassword);
 
-    // if(password != getPassword){
-    //     return false;
+
+    if(password != getPassword){
+        return false;
         
-    // }else
+    }else
+    {
+        let query = `DELETE FROM Room WHERE password = ${password}`
+        await queryPromiseAll(query);
+
+        //get max number of queue
+        let maxOfQueue = await queryPromiseGet(`SELECT MAX(queue) FROM Room WHERE roomNumber = ${roomNumber}`)
+        let nextQueueNumber = maxOfQueue.queue;
+
+        //re
+        for(i=0; i<nextQueueNumber; i++){
+            let insertQuery = `UPDATE Room SET queue = ? WHERE roomNumber = ?`
+            let value = [i,i,roomNumber];
+            await queryPromiseAll(insertQuery, value);
+
+        }
+        
+    }
+    // for(int i = 0,,i++ )
     // {
-    //     let query = `DELETE FROM Room WHERE password = ${password}`
-    //     await queryPromiseAll(query);
-        
-        
+    //     update Room set queque = i+1 where queque= i and NumberRoom=${roomniumber}
     // }
     
 
