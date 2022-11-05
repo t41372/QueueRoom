@@ -3,15 +3,18 @@
 <head>
     <meta charset="utf-8">
     <title>Room ${people} </title>
+    <link href= "./theme.css" type="text/css" rel="stylesheet">
 
 </head>
 
 <body>
 <!-- localhost/ in_room/-->
-    ${getPeople(password)}
-    
-    <button onclick="exitRoom()">Exit Room</button>
-
+    <!-- Particles.js div -->
+    <div id="particles-js">
+        <h2>${getPeople(password)} </h2>
+        
+        <button onclick="exitRoom()">Exit Room</button>
+    </div>
 </body>
 
 <script type="text/javascript">
@@ -28,4 +31,9 @@
     }
 
 </script>
+
+    <!-- Import Particles.js and app.js files -->
+    <!-- Import Particles.js and app.js files -->
+    <script src="./particles.js"></script>
+    <script src="./app.js"></script>
 
