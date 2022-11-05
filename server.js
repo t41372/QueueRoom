@@ -29,6 +29,49 @@ app.get('/', (req, res) => {
     //render 會告訴view engine 這是獨立的一個頁面，不需要layout
 })
 
+// need a query param password
+app.get('/in_room', async(req, res) => {
+    // /in_room/?password=1234
+    let password = req.query.password;
+    let people = ((await getPeople(password))[0])
+    let roomNumber = people.RoomNumber;
+
+    let html = `<!DOCTYPE html>
+
+    <head>
+        <meta charset="utf-8">
+        <title>Room ${roomNumber} </title>
+    
+    </head>
+    
+    <body>
+    <!-- localhost/ in_room/-->
+        <p>ID: ${people.id}, password: ${people.password}, RoomNumber: ${people.RoomNumber}, queue: ${people.queue}</p>
+        <button onclick="exitRoom()">Exit Room</button>
+    
+    </body>
+    
+    <script type="text/javascript">
+        function exitRoom() {
+            var url = "deleteUser/";
+            var params = "password=${password}";
+            var http = new XMLHttpRequest();
+
+            http.open("GET", url+params, true);
+            http.onreadystatechange = function()
+            {
+                if(http.readyState == 4 && http.status == 200) {
+                    alert(http.responseText);
+                }
+            }
+            http.send(null);
+        }
+    
+    </script>`;
+
+    res.send(html)
+})
+
 // Create a new room
 app.get('/addRoom/:roomName', (req, res) => {
     console.log("hello is " + req.query)
@@ -75,7 +118,7 @@ app.get('/getPeople/', async (req, res) => {
 })
 
 // :password is the password of the people to be deleted
-app.delete('/deleteUser/:password', (req, res) => {
+app.get('/deleteUser/:password', (req, res) => {
     if(!deleteUser(req.params.password))
     {
         res.send("Fail")
@@ -88,7 +131,6 @@ app.get('/getRoom/:roomNumber', async (req, res) => {
     res.json(
         await getTable(req.params.roomNumber)
     )
-    
 })
 
 
@@ -143,7 +185,6 @@ async function getPeople(password){
     return getRoom
 }
 
-
 // query the database db with input parameter "query" using ALL
 // return undefined if the query target does not exists
 async function queryPromiseAll(query)
@@ -172,6 +213,11 @@ async function queryPromiseGet(query)
                 console.log("data on error is " + data)
                 console.log(err.message)
                 reject(err.message)
+            }
+            if(!data)
+            {
+                console.log("data is undefined")
+            
             }
             resolve(data)
         })
@@ -252,13 +298,17 @@ async function addPeople(roomNumber){
 //Return: False is return, if password doesn't exsist 
 async function deleteUser(password){
     //1. check if the user exists
-    let insertQuery = `SELECT password FROM Room WHERE password = 2222`
+    let insertQuery = `SELECT password FROM Room WHERE password = ${password}`
     let getValue = await queryPromiseGet(insertQuery)
     //get password
+    console.log("get value is")
+    console.log(getValue)
+    console.log("pswd is " + password)
     let getPassword = getValue.password;
+    console.log("get password is " + getPassword)
 
     //get room nuumber by password
-    let getRoomnumber = await queryPromiseGet(`SELECT RoomNumber FROM Room WHERE password = 2222`)
+    let getRoomnumber = await queryPromiseGet(`SELECT RoomNumber FROM Room WHERE password = ${password}`)
     let roomNumber = getRoomnumber.RoomNumber
 
     //get queue
