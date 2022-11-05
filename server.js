@@ -33,7 +33,14 @@ app.get('/', (req, res) => {
 app.get('/in_room', async(req, res) => {
     // /in_room/?password=1234
     let password = req.query.password;
-    let people = ((await getPeople(password))[0])
+    console.log("pswd is " + password)
+    let people = (await getPeople(password))[0]
+    if(!people)
+    {
+        console.log("User not exists")
+        res.send("User not exists")
+    }
+    console.log(people)
     let roomNumber = people.RoomNumber;
 
     let html = `<!DOCTYPE html>
@@ -54,7 +61,7 @@ app.get('/in_room', async(req, res) => {
     <script type="text/javascript">
         function exitRoom() {
             var url = "deleteUser/";
-            var params = "password=${password}";
+            var params = "${password}";
             var http = new XMLHttpRequest();
 
             http.open("GET", url+params, true);
@@ -64,7 +71,7 @@ app.get('/in_room', async(req, res) => {
                     alert(http.responseText);
                 }
             }
-            http.send(null);
+            http.send("You have now left the room");
         }
     
     </script>`;
@@ -166,12 +173,18 @@ app.listen(port, () => {
 // Run 獲取一堆數據,
 // Param: insertQuery: the query
 async function queryPromiseRun(insertQuery, values){
-    return new Promise((resolve, reject) =>{
+    return new Promise((resolve, reject) => {
         // 把query传给insertQuery， values用来赋值
         db.run(insertQuery, values, (err) => {
         if(err)
         {
             console.log(err.message);
+        }
+        if(!data)
+        {
+            console.log("data is undefined")
+            console.log(`err is ${err}, data is ${data}`)
+        
         }
         resolve();
         })
@@ -196,6 +209,12 @@ async function queryPromiseAll(query)
                 console.log("Rejected 152")
                 reject(err.message)
             }
+            if(!data)
+            {
+                console.log("data is undefined")
+                console.log(`err is ${err}, data is ${data}`)
+            
+            }
             resolve(data)
         })
     })
@@ -217,6 +236,7 @@ async function queryPromiseGet(query)
             if(!data)
             {
                 console.log("data is undefined")
+                console.log(`err is ${err}, data is ${data}`)
             
             }
             resolve(data)
@@ -318,6 +338,7 @@ async function deleteUser(password){
 
 
     if(password != getPassword){
+        console.log('Wrong!!!!!')
         return false;
         
     }else
@@ -333,7 +354,7 @@ async function deleteUser(password){
         //reset queue from Room
         for(i=0; i<nextQueueNumber - queueValue; i++){
             let insertQuery = `UPDATE Room SET queue = ${queueValue+i-1} WHERE queue = ${queueValue+i} AND roomNumber = ${roomNumber}`
-            await queryPromiseAll(insertQuery, value);
+            await queryPromiseAll(insertQuery, null);
         }
     }
 
