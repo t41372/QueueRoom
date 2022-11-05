@@ -14,11 +14,9 @@ let db = new sqlite3.Database("./database.db", (err) => {
     }
 })
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/html/welcome_page.html')
-    //res.render('home') 
-    //render 會告訴view engine 這是獨立的一個頁面，不需要layout
-})
+app.use(express.static('html'))
+
+
 
 // need a query param password
 app.get('/in_room', async(req, res) => {
