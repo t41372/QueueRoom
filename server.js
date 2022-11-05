@@ -172,7 +172,9 @@ async function addPeople(roomNumber){
     // 3. add people into the room with password and return the new password
 
     let maxOfQueue = await queryPromiseGet(`SELECT MAX(queue) FROM Room WHERE RoomNumber = ${roomNumber}`)
-    let nextQueueNumber = maxOfQueue.queue
+    let nextQueueNumber = maxOfQueue["MAX(queue)"] + 1
+    console.log(nextQueueNumber)
+
     console.log(`next queue number is ${nextQueueNumber}`)
     if(!maxOfQueue) //if max of queue is null, means the room is empty
     {
@@ -203,7 +205,9 @@ async function deleteUser(password){
     let roomNumber = getRoomnumber.RoomNumber
 
     //get queue
-    let getQueue = await queryPromiseAll(`SELECT queue FROM Room WHERE RoomNumber = ${roomNumber}`)
+    let getQueue = await queryPromiseGet(`SELECT queue FROM Room WHERE password = ${password}`)
+    // console.log(getPassword);
+    let queueValue = getQueue.queue
 
 
     if(password != getPassword){
@@ -211,27 +215,20 @@ async function deleteUser(password){
         
     }else
     {
+        //delete user by password
         let query = `DELETE FROM Room WHERE password = ${password}`
         await queryPromiseAll(query);
 
         //get max number of queue
         let maxOfQueue = await queryPromiseGet(`SELECT MAX(queue) FROM Room WHERE roomNumber = ${roomNumber}`)
-        let nextQueueNumber = maxOfQueue.queue;
+        let nextQueueNumber = maxOfQueue["MAX(queue)"] + 1
 
-        //re
-        for(i=0; i<nextQueueNumber; i++){
-            let insertQuery = `UPDATE Room SET queue = ? WHERE roomNumber = ?`
-            let value = [i,i,roomNumber];
+        //reset queue from Room
+        for(i=0; i<nextQueueNumber - queueValue; i++){
+            let insertQuery = `UPDATE Room SET queue = ${queueValue+i-1} WHERE queue = ${queueValue+i} AND roomNumber = ${roomNumber}`
             await queryPromiseAll(insertQuery, value);
-
         }
-        
     }
-    // for(int i = 0,,i++ )
-    // {
-    //     update Room set queque = i+1 where queque= i and NumberRoom=${roomniumber}
-    // }
-    
 
 }
 
