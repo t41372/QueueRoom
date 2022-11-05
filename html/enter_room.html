@@ -3,26 +3,39 @@
 <head>
     <meta charset="utf-8">
     <title>Enter Room    </title>
+    <link href= "./theme.css" type="text/css" rel="stylesheet">
+
 </head>
 
 <body>
     <h1>Enter Room, plase enter the room</h1>
 
-    <!-- New User-->
-    <h1>New User</h1>
-    <form action="http://localhost:8080/addPeople/" method="get">
-        <label>Room Number:</label>
-        <input type="text" name="roomNumber" placeholder="Room name"/>
-        <input type="submit" value="Submit"/>
-    </form>
+    <div id="center-card">
+        <!-- New User-->
+        <h1>New User</h1>
+        <form action="http://localhost:8080/addPeople/" method="get">
+            <label>Room Number:</label>
+            <input type="text" name="roomNumber" placeholder="Room Number"/>
+            <input type="submit" value="Submit"/>
+        </form>
 
-    <!-- Existing User-->
-    <h1>Existing User</h1>
-    <form action="http://localhost:8080/getPeople/" method="get">
-        <label>Room Number:</label>
-        password: <input type="password" name="password">
-        <input type="submit" value="Submit"/>
-    </form>
+        <!-- Existing User-->
+        <h1>Existing User</h1>
+        <form action="http://localhost:8080/getPeople/" method="get">
+            <label>Password:</label>
+                <input type="password" name="password" placeholder="Password">
+                <input type="submit" value="Submit" />
+        </form>
+
+    </div>
 
 
 </body>
+
+
+<script language="javascript" type="text/javascript">
+    function gotoRoom()
+    {
+        window.location.href='./in_room.html';
+    }
+</script>

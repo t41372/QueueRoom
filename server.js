@@ -7,15 +7,6 @@ const { engine } = require('express-handlebars')
 
 const port = 8080
 
-// use handlebars as the view engine: what process the dynamic html
-// app.engine('handlebars', engine())
-// app.set('view engine', "handlebars");
-// app.set("views", "./views")
-
-// app.use(express.static('static'));
-// app.use(express.urlencoded( {extended: false}));
-// app.use(cookieParser());
-
 let db = new sqlite3.Database("./database.db", (err) => {
     if(err)
     {
@@ -45,22 +36,50 @@ app.get('/in_room', async(req, res) => {
 
     let html = `<!DOCTYPE html>
 
+    <style>
+        body{
+            background-color: #969696;
+        }
+        
+        h1{
+            color: white
+        }
+        
+        p{
+            font-family:"Times New Roman", Times, serif;
+            font-size: 30px;
+        }
+        
+        #center-card{
+            position: absolute;
+            padding: 7%;
+            padding-top: 4%;
+            top: 20%;
+            left: 30%;
+            background-color: rgba(255, 255, 255, 0.471);
+            border-radius: 10px;
+        }
+    </style>
+
     <head>
         <meta charset="utf-8">
         <title>Room ${roomNumber} </title>
-    
+        <link href= "./html/theme.css" type="text/css" rel="stylesheet">
     </head>
+    
     
     <body>
     <!-- localhost/ in_room/-->
-        <p>ID: ${people.id}, password: ${people.password}, RoomNumber: ${people.RoomNumber}, queue: ${people.queue}</p>
-        <button onclick="exitRoom()">Exit Room</button>
+        <div id="center-card">
+            <p>ID: ${people.id}, password: ${people.password}, RoomNumber: ${people.RoomNumber}, queue: ${people.queue}</p>
+            <button onclick="exitRoom()">Exit Room</button>
+        </div>
     
     </body>
     
     <script type="text/javascript">
         function exitRoom() {
-            var url = "deleteUser/";
+            var url = "/deleteUser/";
             var params = "${password}";
             var http = new XMLHttpRequest();
 
@@ -74,7 +93,8 @@ app.get('/in_room', async(req, res) => {
             http.send("You have now left the room");
         }
     
-    </script>`;
+    </script>
+    `;
 
     res.send(html)
 })
@@ -104,8 +124,7 @@ app.get('/addPeople/', async (req, res) => {
     {
         let people = (await getPeople(password))[0]
         // console.log(people)
-        res.send(`Successfully add people into room ${req.query.roomNumber}, password is ${password}<br/>` +
-        `ID: ${people.id}, password: ${people.password}, RoomNumber: ${people.RoomNumber}, queue: ${people.queue}`)
+        res.redirect("/in_room/?password=" + people.password)
     }
     else
     {
@@ -115,13 +134,12 @@ app.get('/addPeople/', async (req, res) => {
 
 // get data about a person
 app.get('/getPeople/:password', async (req, res) => {
-    let people = (await getPeople(req.params.password))[0]
-    res.send(`ID: ${people.id}, password: ${people.password}, RoomNumber: ${people.RoomNumber}, queue: ${people.queue}`)
+    res.redirect("/in_room/?password=" + req.query.password)
 })
 
 app.get('/getPeople/', async (req, res) => {
-    let people = (await getPeople(req.query.password))[0]
-    res.send(`ID: ${people.id}, password: ${people.password}, RoomNumber: ${people.RoomNumber}, queue: ${people.queue}`)
+    res.redirect("/in_room/?password=" + req.query.password)
+    
 })
 
 // :password is the password of the people to be deleted
@@ -139,23 +157,6 @@ app.get('/getRoom/:roomNumber', async (req, res) => {
         await getTable(req.params.roomNumber)
     )
 })
-
-
-
-// app.post("/get_actor", async (req, res) => {
-//     const lastName = req.body.actor;
-//     const db = await dbPromise;
-//     let query = 'SELECT * FROM actor WHERE last_name = ?';
-//     let result = await db.get(query, lastName);
-
-//     if(result)
-//     {
-//         console.log(result)
-//     } else {
-//         console.log("No result found")
-//     }
-
-// })
 
 app.listen(port, () => {
     console.log('Server is running on port ' + port)
@@ -238,7 +239,7 @@ async function queryPromiseGet(query)
     })
 }
 
-//
+//get all information from a room
 async function getTable(roomNumber){
     let maxOfQueue = await queryPromiseGet(`SELECT MAX(queue) FROM Room WHERE RoomNumber = ${roomNumber}`)
     let nextQueueNumber = maxOfQueue["MAX(queue)"]
@@ -258,10 +259,11 @@ async function addRoom(roomName){
 // Return: password of the added people, False if fail (room not exists)
 async function addPeople(roomNumber){
     // 1. check if the room exists in the room list
-    let queryResult = await queryPromiseAll(`SELECT * FROM RoomList WHERE RoomNumber = ${roomNumber}`)
+    let queryResult = await queryPromiseGet(`SELECT RoomNumber FROM RoomList WHERE RoomNumber = ${roomNumber}`)
+    let getRoom = queryResult.RoomNumber
     
     // if query result exists, the room must exists
-    if(!queryResult) // if the room not exists
+    if(!getRoom) // if the room not exists
     {
         console.log(`Room ${roomNumber} not exists, query result is ${queryResult}`)
         return false;
@@ -273,7 +275,7 @@ async function addPeople(roomNumber){
 
     while(true)
     {
-        let queryResult = await queryPromiseGet(`SELECT password FROM Room WHERE password = ${newPassword}`)
+        queryResult = await queryPromiseGet(`SELECT password FROM Room WHERE password = ${newPassword}`)
         if(!queryResult) // if the password not exists
         {
             break;
@@ -345,9 +347,16 @@ async function deleteUser(password){
         let maxOfQueue = await queryPromiseGet(`SELECT MAX(queue) FROM Room WHERE roomNumber = ${roomNumber}`)
         let nextQueueNumber = maxOfQueue["MAX(queue)"]
 
+        //queue value is the queue of the deleted user
+        //nextQueueNumber is the max queue of the room 
+        
         //reset queue from Room
         for(i=0; i<nextQueueNumber - queueValue; i++){
-            let insertQuery = `UPDATE Room SET queue = ${queueValue+i-1} WHERE queue = ${queueValue+i} AND roomNumber = ${roomNumber}`
+            // console.log("i is " + i)
+            // console.log(queueValue)
+            // console.log(queueValue+i)
+            // console.log(queueValue+i+1)
+            let insertQuery = `UPDATE Room SET queue = ${queueValue+i} WHERE queue = ${queueValue+i+1} AND roomNumber = ${roomNumber}`
             await queryPromiseAll(insertQuery, null);
         }
 

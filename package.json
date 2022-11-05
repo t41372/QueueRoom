@@ -20,6 +20,7 @@
   "dependencies": {
     "express": "^4.18.2",
     "express-handlebars": "^6.0.6",
+    "particlesjs": "^2.2.3",
     "sqlite": "^4.1.2",
     "sqlite3": "^5.1.2"
   }
