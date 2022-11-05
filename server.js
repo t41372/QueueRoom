@@ -24,8 +24,8 @@ let db = new sqlite3.Database("./database.db", (err) => {
 })
 
 app.get('/', (req, res) => {
-
-    res.render('home') 
+    res.send('Hello World!')
+    //res.render('home') 
     //render 會告訴view engine 這是獨立的一個頁面，不需要layout
 })
 
