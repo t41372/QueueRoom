@@ -8,25 +8,29 @@
 </head>
 
 <body>
-    <h1>Enter Room, plase enter the room</h1>
+    <!-- Particles.js div -->
+    <div id="particles-js">
 
-    <div id="center-card">
-        <!-- New User-->
-        <h1>New User</h1>
-        <form action="http://localhost:8080/addPeople/" method="get">
-            <label>Room Number:</label>
-            <input type="text" name="roomNumber" placeholder="Room Number"/>
-            <input type="submit" value="Submit"/>
-        </form>
+        <h1>Enter Room, plase enter the room</h1>
 
-        <!-- Existing User-->
-        <h1>Existing User</h1>
-        <form action="http://localhost:8080/getPeople/" method="get">
-            <label>Password:</label>
-                <input type="password" name="password" placeholder="Password">
-                <input type="submit" value="Submit" />
-        </form>
+        <div id="center-card">
+            <!-- New User-->
+            <h1>New User</h1>
+            <form action="http://localhost:8080/addPeople/" method="get">
+                <label>Room Number:</label>
+                <input type="text" name="roomNumber" placeholder="Room Number"/>
+                <input type="submit" value="Submit"/>
+            </form>
 
+            <!-- Existing User-->
+            <h1>Existing User</h1>
+            <form action="http://localhost:8080/getPeople/" method="get">
+                <label>Password:</label>
+                    <input type="password" name="password" placeholder="Password">
+                    <input type="submit" value="Submit" />
+            </form>
+
+        </div>
     </div>
 
 
@@ -39,3 +43,8 @@
         window.location.href='./in_room.html';
     }
 </script>
+
+<!-- Import Particles.js and app.js files -->
+    <!-- Import Particles.js and app.js files -->
+    <script src="./particles.js"></script>
+    <script src="./app.js"></script>
