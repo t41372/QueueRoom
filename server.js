@@ -349,13 +349,15 @@ async function deleteUser(password){
 
         //get max number of queue
         let maxOfQueue = await queryPromiseGet(`SELECT MAX(queue) FROM Room WHERE roomNumber = ${roomNumber}`)
-        let nextQueueNumber = maxOfQueue["MAX(queue)"] + 1
+        let nextQueueNumber = maxOfQueue["MAX(queue)"]
 
         //reset queue from Room
         for(i=0; i<nextQueueNumber - queueValue; i++){
             let insertQuery = `UPDATE Room SET queue = ${queueValue+i-1} WHERE queue = ${queueValue+i} AND roomNumber = ${roomNumber}`
             await queryPromiseAll(insertQuery, null);
         }
+
+        
     }
 
 }
