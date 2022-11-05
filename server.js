@@ -30,9 +30,12 @@ app.get('/', (req, res) => {
 })
 
 // Create a new room
-app.post('/addRoom', (req, res) => {
-    addRoom()
+app.get('/addRoom/:roomName', (req, res) => {
+    console.log("room name is " + req.params.roomName)
+    //addRoom(req.params.roomName)
+    res.send("Successfully add room " + req.params.roomName)
 })
+
 // :id is the room number to add people into
 app.get('/addPeople/:roomNumber', (req, res) => {
     // add people into the specific room
@@ -55,6 +58,15 @@ app.delete('/deleteUser/:password', (req, res) => {
     {
         res.send("Fail")
     }
+})
+
+
+app.get('/getRoom/:roomNumber', async (req, res) => {
+    console.log(await getTable(req.params.roomNumber))
+    res.json(
+        await getTable(req.params.roomNumber)
+    )
+    
 })
 
 
@@ -125,6 +137,9 @@ async function queryPromiseGet(query)
         db.get(query, (err, data) => { //.all 用於獲取所有東西的特定fields
             if(err)                 //.get 可以獲取單一特定數據
             {
+                
+                console.log("data on error is " + data)
+                console.log(err.message)
                 reject(err.message)
             }
             resolve(data)
@@ -132,7 +147,15 @@ async function queryPromiseGet(query)
     })
 }
 
+//
+async function getTable(roomNumber){
+    let maxOfQueue = await queryPromiseGet(`SELECT MAX(queue) FROM Room WHERE RoomNumber = ${roomNumber}`)
+    let nextQueueNumber = maxOfQueue["MAX(queue)"]
+    return nextQueueNumber;
+}
 
+
+//add room
 async function addRoom(roomName){
     let insertQuery = `INSERT INTO RoomList(RoomNumber,RoomName) values(?,?)`;
     let value = [null,roomName];
@@ -145,6 +168,7 @@ async function addRoom(roomName){
 async function addPeople(roomNumber){
     // 1. check if the room exists in the room list
     let queryResult = await queryPromiseGet(`SELECT * FROM RoomList WHERE RoomNumber = ${roomNumber}`)
+
 
     // if query result exists, the room must exists
     if(!queryResult) // if the room not exists
@@ -160,6 +184,7 @@ async function addPeople(roomNumber){
     while(true)
     {
         let queryResult = await queryPromiseGet(`SELECT * FROM Room WHERE password = ${password}`)
+        
         if(!queryResult) // if the password not exists
         {
             break;
@@ -176,17 +201,20 @@ async function addPeople(roomNumber){
     console.log(nextQueueNumber)
 
     console.log(`next queue number is ${nextQueueNumber}`)
+
     if(!maxOfQueue) //if max of queue is null, means the room is empty
     {
         maxOfQueue = 0;
     }
 
-    queryPromiseGet = await queryPromiseRun(`INSERT INTO Room (roomNumber, password, queue) VALUES (${roomNumber}, ${password}, ${nextQueueNumber})`)
+    queryPromiseGet = await queryPromiseRun(`INSERT INTO Room(id, roomNumber, password, queue) VALUES(null, ${roomNumber}, ${password}, ${nextQueueNumber})`)
     console.log("Successfully add people into room " + roomNumber + ", password is " + password)
+
     
     return password
 
     // !-------INSERT INTO Room(id,password,RoomNumber,queue) values(1,2222,null,1);
+
 
 }
 
