@@ -180,12 +180,6 @@ async function queryPromiseRun(insertQuery, values){
         {
             console.log(err.message);
         }
-        if(!data)
-        {
-            console.log("data is undefined")
-            console.log(`err is ${err}, data is ${data}`)
-        
-        }
         resolve();
         })
     })
