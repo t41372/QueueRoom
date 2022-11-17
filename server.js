@@ -371,4 +371,7 @@ async function deleteUser(password){
 // 這邊我們放入一個變數，變數的內容是從server.js傳過來的
 // Mustache Template Engine
 
-
+// redirect every unkown route to home page
+app.get('*', (req, res)=>{
+    res.redirect('/welcome_page.html')
+})
