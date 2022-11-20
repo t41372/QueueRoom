@@ -5,7 +5,7 @@ const app = express()
 const { engine } = require('express-handlebars')
 //const cookieParser = require('cookie-parser')
 
-const port = 8080
+const port = process.env.PORT | 8080
 
 let db = new sqlite3.Database("./database.db", (err) => {
     if(err)
@@ -30,6 +30,7 @@ app.get('/in_room', async(req, res) => {
     {
         console.log("User not exists")
         res.send("User not exists")
+        return;
     }
     console.log(people)
     let roomNumber = people.RoomNumber;
@@ -38,7 +39,7 @@ app.get('/in_room', async(req, res) => {
 
     <style>
         body{
-            background-color: #969696;
+            background-color: #1a1a1a;
         }
         
         h1{
@@ -59,6 +60,15 @@ app.get('/in_room', async(req, res) => {
             background-color: rgba(255, 255, 255, 0.471);
             border-radius: 10px;
         }
+        #particles-js{
+            width: 100%;
+            height: 100%;
+            background-color: #1a1a1a;
+            background-image: url('');
+            background-size: cover;
+            background-position: 50% 50%;
+            background-repeat: no-repeat;
+        }
     </style>
 
     <head>
@@ -70,11 +80,12 @@ app.get('/in_room', async(req, res) => {
     
     <body>
     <!-- localhost/ in_room/-->
-        <div id="center-card">
-            <p>ID: ${people.id}, password: ${people.password}, RoomNumber: ${people.RoomNumber}, queue: ${people.queue}</p>
-            <button onclick="exitRoom()">Exit Room</button>
+        <div id="particles-js">
+            <div id="center-card">
+                <p>ID: ${people.id}, password: ${people.password}, RoomNumber: ${people.RoomNumber}, queue: ${people.queue}</p>
+                <button onclick="exitRoom()">Exit Room</button>
+            </div>
         </div>
-    
     </body>
     
     <script type="text/javascript">
@@ -94,6 +105,10 @@ app.get('/in_room', async(req, res) => {
         }
     
     </script>
+    <!-- Import Particles.js and app.js files -->
+    <!-- Import Particles.js and app.js files -->
+    <script src="./particles.js"></script>
+    <script src="./app.js"></script>
     `;
 
     res.send(html)
