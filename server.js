@@ -312,8 +312,10 @@ async function addPeople(roomNumber){
     {
         maxOfQueue = 0;
     }
-
-    queryPromiseGet = await queryPromiseRun(`INSERT INTO Room(id, roomNumber, password, queue) VALUES(null, ${roomNumber}, ${newPassword}, ${nextQueueNumber})`)
+    // 原始代碼:
+    //     queryPromiseGet = await queryPromiseRun(`INSERT INTO Room(id, roomNumber, password, queue) VALUES(null, ${roomNumber}, ${newPassword}, ${nextQueueNumber})`)
+    // queryPromiseGet函數調用兩次必炸的罪魁禍首: 在這316行把queryPromiseGet給覆蓋掉了. 這個插入邏輯本來是不需要存回傳值的...
+    await queryPromiseRun(`INSERT INTO Room(id, roomNumber, password, queue) VALUES(null, ${roomNumber}, ${newPassword}, ${nextQueueNumber})`)
     console.log("Successfully add people into room " + roomNumber + ", password is " + newPassword)
 
     
