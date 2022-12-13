@@ -29,7 +29,8 @@ app.get('/in_room', async(req, res) => {
     if(!people)
     {
         console.log("User not exists")
-        res.send("User not exists")
+        //window.alert("User Not Exist")
+        res.send("Error: User not exists, <a href='http://localhost:8080'>Click Here<a/> to go back")
         return;
     }
     console.log(people)
@@ -82,7 +83,8 @@ app.get('/in_room', async(req, res) => {
     <!-- localhost/ in_room/-->
         <div id="particles-js">
             <div id="center-card">
-                <p>ID: ${people.id}, password: ${people.password}, RoomNumber: ${people.RoomNumber}, queue: ${people.queue}</p>
+                <p>ID: ${people.id}, password: ${people.password}, You Are In Room ${people.RoomNumber}, Queue: ${people.queue}</p>
+                <p>Please refresh the page frequently to see any update</p>
                 <button onclick="exitRoom()">Exit Room</button>
             </div>
         </div>
@@ -102,6 +104,9 @@ app.get('/in_room', async(req, res) => {
                 }
             }
             http.send("You have now left the room");
+            console.log("The lord left the room!")
+            alert("But, you, my friend, you have now left the room")
+            window.location.href='http://localhost:8080';
         }
     
     </script>
@@ -114,6 +119,7 @@ app.get('/in_room', async(req, res) => {
     res.send(html)
 })
 
+//! This function is not complete and it's never used in other place
 // Create a new room
 app.get('/addRoom/:roomName', (req, res) => {
     console.log("hello is " + req.query)
@@ -143,7 +149,34 @@ app.get('/addPeople/', async (req, res) => {
     }
     else
     {
-        res.send("Fail")
+        console.log("Fail to add people into the room...")
+        res.send(`<h1>Unable to add people into the room...</h1>
+        <h2>Go back to home page in <span id='count'>5</span> seconds</h2>
+        <script>
+        
+            function sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        
+            async function run()
+            {
+                for(let count = 5; count >= 0; count --)
+                {
+                    console.log('count == ' + count)
+                    document.getElementById('count').innerText = count
+                    if (count <= 0) {
+                        console.log("Count is 0")
+                        window.location.href = '/';
+                        return
+                    }
+                    await sleep(1000)
+                }
+                console.log("Count is 0")
+                window.location.href = '/';
+                return
+            }
+            run()
+        </script>`)
     }
 })
 
@@ -167,9 +200,9 @@ app.get('/deleteUser/:password', (req, res) => {
 
 
 app.get('/getRoom/:roomNumber', async (req, res) => {
-    console.log(await getTable(req.params.roomNumber))
+    console.log(await getRoom(req.params.roomNumber))
     res.json(
-        await getTable(req.params.roomNumber)
+        await getRoom(req.params.roomNumber)
     )
 })
 
@@ -254,11 +287,11 @@ async function queryPromiseGet(query)
     })
 }
 
-//get all information from a room
-async function getTable(roomNumber){
-    let maxOfQueue = await queryPromiseGet(`SELECT MAX(queue) FROM Room WHERE RoomNumber = ${roomNumber}`)
-    let nextQueueNumber = maxOfQueue["MAX(queue)"]
-    return nextQueueNumber;
+// get all information from a room, return json [RoomNumber, RoomName]
+// return undefined if the room does not exist
+async function getRoom(roomNumber){
+    let queryResult = await queryPromiseGet(`SELECT * FROM RoomList WHERE RoomNumber = ${roomNumber}`)
+    return queryResult;
 }
 
 
@@ -274,15 +307,14 @@ async function addRoom(roomName){
 // Return: password of the added people, False if fail (room not exists)
 async function addPeople(roomNumber){
     // 1. check if the room exists in the room list
-    let queryResult = await queryPromiseGet(`SELECT RoomNumber FROM RoomList WHERE RoomNumber = ${roomNumber}`)
-    let getRoom = queryResult.RoomNumber
-    
+    console.log(" --- Add people logic")
     // if query result exists, the room must exists
-    if(!getRoom) // if the room not exists
+    if(!(await getRoom(roomNumber)) ) // if the room not exists
     {
-        console.log(`Room ${roomNumber} not exists, query result is ${queryResult}`)
+        console.log(`Room ${roomNumber} not exists, query result is ${await getRoom(roomNumber)}`)
         return false;
     }
+    
     
     // 2. create a new password for the new people
 
