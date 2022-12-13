@@ -24,8 +24,14 @@ Current Solution: ignore it. Make the background color the same black as other p
 ~~who knows why...~~ Solved. (Dec 12, 2022) in server.js line 316, the `queryPromiseGet` function is mistakenly overriden, so after running `addPeople` function once, `queryPromiseGet` will not be a function anymore
 
 # Docker Image
-t41372/queue_room_docker
+[t41372/queue_room_docker](https://hub.docker.com/repository/docker/t41372/queue_room_docker)
+
+### Build Docker Image
 ~~~~ shell
-# replace platform with the cpu architecture of your machine... like x86_64 or latest(arm64)
-docker run -d -p 8080:8080 t41372/queue_room_docker:platform
+docker build -t t41372/queue_room_docker:architecture .
+~~~~
+### Run with Docker
+~~~~ shell
+# replace architecture with the cpu architecture of your machine... like x86_64 or arm64. Latest tag is an arm64 build
+docker run -d -p 8080:8080 t41372/queue_room_docker:architecture
 ~~~~
