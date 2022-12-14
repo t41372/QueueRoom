@@ -12,8 +12,8 @@ RESTful API is provided. Docker image is built for speeding the deployment proce
 # set up dependencies
 npm install
 # run Queue Room
-node server.js
-# the server will now be listening on 8080 (default)
+npm start
+# the server will now be listening on 8080 by default
 ~~~~
 
 ## Docker
