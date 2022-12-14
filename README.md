@@ -46,6 +46,6 @@ Potential Causes:
 
 Current Solution: ignore it. Make the background color the same black as other pages to make it less weird.
 
-### ~~~Can't add people twice, or the server crash~~~
+### ~~Can't add people twice, or the server crash~~
 ~~who knows why...~~ Fixed. (Dec 12, 2022) in server.js line 316, the `queryPromiseGet` function is mistakenly overriden, so after running `addPeople` function once, `queryPromiseGet` will not be a function anymore
 
