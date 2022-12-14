@@ -41,8 +41,8 @@
 
 <script language="javascript" type="text/javascript">
     // the data needs to be sent to where the server is running, so we need to know where the server is running
-    document.getElementById("addPeopleForm").setAttribute("action", `http://${window.location.host}/addPeople/`)
-    document.getElementById("getPeopleForm").setAttribute("action", `http://${window.location.host}/getPeople/`)
+    document.getElementById("addPeopleForm").setAttribute("action", `${location.protocol}//${window.location.host}/addPeople/`)
+    document.getElementById("getPeopleForm").setAttribute("action", `${location.protocol}//${window.location.host}/getPeople/`)
     console.log("runnnn")
 
     function gotoRoom()
