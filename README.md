@@ -21,13 +21,18 @@ node server.js
 
 ### Build Docker Image from source code
 ~~~~ shell
-docker build -t t41372/queue_room_docker:architecture .
+docker buildx build \
+    -t t41372/queue_room_docker:latest \
+    --platform linux/amd64,linux/arm64 \
+    --push \
+    .
+
 ~~~~
 ### Run with Docker
 ~~~~ shell
-# replace architecture with the cpu architecture of your machine... like x86_64 or arm64. Latest tag is an arm64 build
-docker run -d -p 8080:8080 t41372/queue_room_docker:architecture
+docker run -d -p 8080:8080 t41372/queue_room_docker
 #             -p (port you want it to listen on:8080)
+#          -d if you want the server to run in the background
 ~~~~
 
 # Bug List
