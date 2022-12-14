@@ -16,7 +16,7 @@
         <div id="center-card">
             <!-- New User-->
             <h1>New User</h1>
-            <form action="http://localhost:8080/addPeople/" method="get">
+            <form id="addPeopleForm" action="http://localhost:8080/addPeople/" method="get">
                 <label>Please secify the room you want to enter:</label>
                 <br/>
                 <label>Room Number:</label>
@@ -26,7 +26,7 @@
 
             <!-- Existing User-->
             <h1>Existing User</h1>
-            <form action="http://localhost:8080/getPeople/" method="get">
+            <form id="getPeopleForm" action="http://localhost:8080/getPeople/" method="get">
                 <label>Password:</label>
                     <input type="password" name="password" placeholder="Password">
                     <input type="submit" value="Submit" />
@@ -40,6 +40,11 @@
 
 
 <script language="javascript" type="text/javascript">
+    // the data needs to be sent to where the server is running, so we need to know where the server is running
+    document.getElementById("addPeopleForm").setAttribute("action", `http://${window.location.host}/addPeople/`)
+    document.getElementById("getPeopleForm").setAttribute("action", `http://${window.location.host}/getPeople/`)
+    console.log("runnnn")
+
     function gotoRoom()
     {
         window.location.href='./in_room.html';

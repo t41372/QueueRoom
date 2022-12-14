@@ -17,7 +17,7 @@ let db = new sqlite3.Database("./database.db", (err) => {
 app.use(express.static('html'))
 
 app.get('/', (req, res) => {
-    res.redirect('/welcome_page.html')
+    res.redirect('welcome_page.html')
 })
 
 // need a query param password
@@ -25,14 +25,22 @@ app.get('/in_room', async(req, res) => {
     // /in_room/?password=1234
     let password = req.query.password;
     console.log("pswd is " + password)
-    let people = (await getPeople(password))[0]
-    if(!people)
+    let people;
+    try
     {
+        people = (await getPeople(password))[0]
+        if(!people)
+        {
+            throw "Empty returned people in getPeople"
+        }
+    }
+    catch{
         console.log("User not exists")
         //window.alert("User Not Exist")
-        res.send("Error: User not exists, <a href='http://localhost:8080'>Click Here<a/> to go back")
+        res.send(errorHTML(`Wrong password`))
         return;
     }
+
     console.log(people)
     let roomNumber = people.RoomNumber;
 
@@ -106,7 +114,7 @@ app.get('/in_room', async(req, res) => {
             http.send("You have now left the room");
             console.log("The lord left the room!")
             alert("But, you, my friend, you have now left the room")
-            window.location.href='http://localhost:8080';
+            window.location.href='welcome_page.html';
         }
     
     </script>
@@ -132,7 +140,7 @@ app.get('/addRoom/:roomName', (req, res) => {
 app.get('/addRoom/', (req, res) => {
     
     addRoom(req.query.room_name)
-    res.send("Successfully add room " + req.query.room_name)
+    res.send(errorHTML("Nice", "Successfully add room " + req.query.room_name))
 })
 
 // :id is the room number to add people into
@@ -150,33 +158,7 @@ app.get('/addPeople/', async (req, res) => {
     else
     {
         console.log("Fail to add people into the room...")
-        res.send(`<h1>Unable to add people into the room...</h1>
-        <h2>Go back to home page in <span id='count'>5</span> seconds</h2>
-        <script>
-        
-            function sleep(ms) {
-                return new Promise(resolve => setTimeout(resolve, ms));
-            }
-        
-            async function run()
-            {
-                for(let count = 5; count >= 0; count --)
-                {
-                    console.log('count == ' + count)
-                    document.getElementById('count').innerText = count
-                    if (count <= 0) {
-                        console.log("Count is 0")
-                        window.location.href = '/';
-                        return
-                    }
-                    await sleep(1000)
-                }
-                console.log("Count is 0")
-                window.location.href = '/';
-                return
-            }
-            run()
-        </script>`)
+        res.send(errorHTML("Unable to add people into the room...", `The room with the room number ${req.query.roomNumber} does not exist. Check the room number you entered`))
     }
 })
 
@@ -194,7 +176,7 @@ app.get('/getPeople/', async (req, res) => {
 app.get('/deleteUser/:password', (req, res) => {
     if(!deleteUser(req.params.password))
     {
-        res.send("Fail")
+        res.send(errorHTML("Fail to delete user:", "the user with the provided password does not exist"))
     }
 })
 
@@ -249,8 +231,9 @@ async function queryPromiseAll(query)
         db.all(query, (err, data) => { //.all 用於獲取所有東西的特定fields
             if(err)                 //.get 可以獲取單一特定數據
             {
-                console.log("Rejected 152")
-                reject(err.message)
+                console.log("Rejected in queryPromiseAll")
+                console.log(err.message)
+                reject(null)
             }
             if(!data)
             {
@@ -262,6 +245,7 @@ async function queryPromiseAll(query)
         })
     })
 }
+
 
 // query the database db with input parameter "query" using GET
 // return undefined if the query target does not exists
@@ -414,6 +398,92 @@ async function deleteUser(password){
 
 }
 
+// return the html code of the error page with customizable headTitle and error message
+function errorHTML(pageHeading, errMSG="")
+{
+    return `
+    <!DOCTYPE html>
+
+    <style>
+        body{
+            background-color: #1a1a1a;
+        }
+        
+        h1{
+            color: white
+        }
+
+        h2{
+            color: white
+        }
+        
+        p{
+            font-family:"Times New Roman", Times, serif;
+            font-size: 30px;
+        }
+        
+        #center-card{
+            position: absolute;
+            padding: 7%;
+            padding-top: 4%;
+            top: 20%;
+            left: 30%;
+            background-color: rgba(255, 255, 255, 0.471);
+            border-radius: 10px;
+        }
+        #particles-js{
+            width: 100%;
+            height: 100%;
+            background-color: #1a1a1a;
+            background-image: url('');
+            background-size: cover;
+            background-position: 50% 50%;
+            background-repeat: no-repeat;
+        }
+    </style>
+
+    <head>
+        <meta charset="utf-8">
+        <title>Error </title>
+        <link href= "./html/theme.css" type="text/css" rel="stylesheet">
+    </head>
+    
+    <body>
+        <h1>${pageHeading}</h1>
+        <h2>${errMSG}</h2>
+        <Button onclick="history.back()">Go to Previous Page</Button>
+        <Button onclick="window.location.href= 'http://' + window.location.host">Go to Home Page</Button>
+    </body>
+
+    <script>
+    
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    
+        // this is a count down function. Abandoned 
+        // async function run()
+        // {
+        //     for(let count = 5; count >= 0; count --)
+        //     {
+        //         console.log('count == ' + count)
+        //         document.getElementById('count').innerText = count
+        //         if (count <= 0) {
+        //             console.log("Count is 0")
+        //             history.go(-1)
+        //             return
+        //         }
+        //         await sleep(1000)
+        //     }
+        //     console.log("Count is 0")
+        //     history.go(-1)
+        //     return
+        // }
+        
+    </script>`
+}
+
+
 // deleteUser();
 // handlebar 是一個template engine，可以讓我們在html裡面加入一些動態的內容
 // 例如：{{}}，這個就是handlebar的語法，可以在裡面放入一些變數，或是function
@@ -422,5 +492,5 @@ async function deleteUser(password){
 
 // redirect every unkown route to home page
 app.get('*', (req, res)=>{
-    res.redirect('/welcome_page.html')
+    res.redirect('welcome_page.html')
 })
