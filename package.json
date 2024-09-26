@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/t41372/QueueRoom#readme",
   "dependencies": {
-    "express": "^4.18.2",
+    "express": "^4.21.0",
     "express-handlebars": "^6.0.6",
     "particlesjs": "^2.2.3",
     "sqlite": "^4.1.2",
